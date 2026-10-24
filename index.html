@@ -1,467 +1,159 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IvanProject · GitHub Gist Preview</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%232f81f7'><path d='M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z'/></svg>">
-  <style>
-    :root {
-      --canvas-default: #ffffff;
-      --canvas-subtle: #f6f8fa;
-      --border-default: #d0d7de;
-      --border-muted: #e1e4e8;
-      --fg-default: #1f2328;
-      --fg-muted: #656d76;
-      --accent-fg: #0969da;
-      --btn-bg: #f6f8fa;
-      --btn-border: rgba(31,35,40,0.15);
-      --btn-hover: #f3f4f6;
-      --header-bg: #24292f;
-      --header-text: #ffffff;
-      --code-bg: #f6f8fa;
-      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
-      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-    }
-
-    [data-theme="dark"] {
-      --canvas-default: #0d1117;
-      --canvas-subtle: #161b22;
-      --border-default: #30363d;
-      --border-muted: #21262d;
-      --fg-default: #e6edf3;
-      --fg-muted: #848d97;
-      --accent-fg: #2f81f7;
-      --btn-bg: #21262d;
-      --btn-border: #30363d;
-      --btn-hover: #30363d;
-      --header-bg: #010409;
-      --header-text: #f0f6fc;
-      --code-bg: #0d1117;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-sans);
-      background-color: var(--canvas-default);
-      color: var(--fg-default);
-      line-height: 1.5;
-      font-size: 14px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Top bar */
-    .gh-header {
-      background-color: var(--header-bg);
-      color: var(--header-text);
-      padding: 12px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border-muted);
-    }
-    .gh-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 600;
-      color: inherit;
-      text-decoration: none;
-      font-size: 15px;
-    }
-    .gh-brand svg { fill: currentColor; }
-
-    .header-actions { display: flex; align-items: center; gap: 10px; }
-    .theme-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: var(--header-text);
-      border-radius: 6px;
-      padding: 5px 12px;
-      cursor: pointer;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .theme-btn:hover { background: rgba(255, 255, 255, 0.16); }
-
-    /* Content */
-    .main-container {
-      max-width: 1100px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 28px 20px;
-      flex: 1;
-    }
-
-    /* Gist title & metadata */
-    .gist-meta {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-    .gist-author { display: flex; align-items: center; gap: 12px; }
-    .avatar {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      border: 1px solid var(--border-default);
-      background: var(--canvas-subtle);
-    }
-    .gist-breadcrumbs {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--accent-fg);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .gist-breadcrumbs a { color: inherit; text-decoration: none; }
-    .gist-breadcrumbs a:hover { text-decoration: underline; }
-    .badge {
-      font-size: 11px;
-      border: 1px solid var(--border-default);
-      color: var(--fg-muted);
-      padding: 1px 7px;
-      border-radius: 12px;
-      font-weight: 500;
-    }
-    .gist-subtext { font-size: 12px; color: var(--fg-muted); margin-top: 3px; }
-
-    /* Card Box */
-    .gist-box {
-      border: 1px solid var(--border-default);
-      border-radius: 6px;
-      background: var(--canvas-default);
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    }
-
-    .box-header {
-      background: var(--canvas-subtle);
-      border-bottom: 1px solid var(--border-default);
-      padding: 8px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .box-filename {
-      font-size: 13px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .box-filename svg { fill: var(--fg-muted); }
-
-    /* Tabs */
-    .tab-group {
-      display: inline-flex;
-      background: var(--btn-bg);
-      border: 1px solid var(--btn-border);
-      border-radius: 6px;
-      padding: 2px;
-    }
-    .tab-item {
-      padding: 4px 12px;
-      font-size: 12px;
-      font-weight: 500;
-      border: none;
-      background: transparent;
-      color: var(--fg-muted);
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    .tab-item.active {
-      background: var(--canvas-default);
-      color: var(--fg-default);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    .btn-group { display: flex; align-items: center; gap: 6px; }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: var(--btn-bg);
-      border: 1px solid var(--btn-border);
-      color: var(--fg-default);
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      text-decoration: none;
-    }
-    .btn:hover { background: var(--btn-hover); border-color: var(--border-default); }
-
-    /* Code View */
-    .view-code {
-      display: flex;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      line-height: 20px;
-      background: var(--code-bg);
-      overflow-x: auto;
-    }
-    .line-nums {
-      padding: 12px 10px;
-      color: var(--fg-muted);
-      border-right: 1px solid var(--border-muted);
-      text-align: right;
-      user-select: none;
-      min-width: 44px;
-    }
-    .line-nums div { height: 20px; }
-    .code-lines {
-      padding: 12px 16px;
-      white-space: pre;
-      overflow-x: auto;
-      flex: 1;
-      color: var(--fg-default);
-    }
-
-    /* Preview View */
-    .view-preview {
-      display: none;
-      width: 100%;
-      height: 480px;
-      border: none;
-      background: #ffffff;
-    }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: #1f2328;
-      color: #fff;
-      padding: 10px 16px;
-      border-radius: 6px;
-      font-size: 13px;
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.25s ease;
-      pointer-events: none;
-    }
-    .toast.show { opacity: 1; transform: translateY(0); }
-
-    /* Footer */
-    footer {
-      border-top: 1px solid var(--border-muted);
-      text-align: center;
-      padding: 24px;
-      color: var(--fg-muted);
-      font-size: 12px;
-    }
-    footer a { color: var(--accent-fg); text-decoration: none; }
-  </style>
-</head>
-<body>
-
-  <!-- Top Header -->
-  <header class="gh-header">
-    <a href="#" class="gh-brand">
-      <svg height="24" viewBox="0 0 16 16" width="24"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
-      <span>GitHub Gist</span>
-    </a>
-    <div class="header-actions">
-      <button class="theme-btn" id="themeToggle">🌓 Toggle Theme</button>
-    </div>
-  </header>
-
-  <!-- Main Gist Container -->
-  <main class="main-container">
-    <div class="gist-meta">
-      <div class="gist-author">
-        <img class="avatar" src="https://github.com/identicons/vanyadiamant18-debug.png" alt="Avatar" />
-        <div>
-          <div class="gist-breadcrumbs">
-            <a href="https://github.com/vanyadiamant18-debug">vanyadiamant18-debug</a>
-            <span>/</span>
-            <strong id="docTitle">index.html</strong>
-            <span class="badge">Public</span>
-          </div>
-          <div class="gist-subtext">Created today · Instant interactive preview</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Gist File Box -->
-    <div class="gist-box">
-      <div class="box-header">
-        <div class="box-filename">
-          <svg height="16" viewBox="0 0 16 16" width="16"><path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0113.25 16h-9.5A1.75 1.75 0 012 14.25V1.75z"></path></svg>
-          <span id="boxFileName">preview.html</span>
-        </div>
-
-        <!-- View Mode Switcher -->
-        <div class="tab-group">
-          <button class="tab-item active" id="tabCode">Code</button>
-          <button class="tab-item" id="tabPreview">Preview</button>
-        </div>
-
-        <!-- Actions -->
-        <div class="btn-group">
-          <button class="btn" id="rawBtn">Raw</button>
-          <button class="btn" id="copyBtn">Copy</button>
-          <button class="btn" id="downloadBtn">Download</button>
-        </div>
-      </div>
-
-      <!-- Code View -->
-      <div class="view-code" id="codeView">
-        <div class="line-nums" id="lineNums"></div>
-        <pre class="code-lines"><code id="codeText"></code></pre>
-      </div>
-
-      <!-- Preview View -->
-      <iframe class="view-preview" id="previewFrame" sandbox="allow-scripts allow-modals"></iframe>
-    </div>
-  </main>
-
-  <div class="toast" id="toast">Copied to clipboard!</div>
-
-  <footer>
-    <p>IvanProject · Built like a <a href="https://gist.github.com" target="_blank">GitHub Gist</a> · Ready for GitHub Pages</p>
-  </footer>
-
-  <script>
-    // Snippet content displayed inside the Gist card
-    const defaultHtmlSnippet = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Hello from IvanProject</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IvanProject</title>
   <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      --accent-gradient: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc);
+      --card-bg: rgba(255, 255, 255, 0.05);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(135deg, #0969da, #8a2be2);
-      color: white;
-      height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      margin: 0;
+      padding: 24px;
+      line-height: 1.6;
     }
-    .card {
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      padding: 32px 48px;
-      border-radius: 16px;
+
+    .container {
+      max-width: 680px;
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 20px;
+      padding: 48px 36px;
       text-align: center;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
     }
-    button {
-      background: #ffffff;
-      color: #0969da;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
+
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      font-size: 13px;
       font-weight: 600;
+      letter-spacing: 0.5px;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 9999px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 2.75rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+
+    p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 32px;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      text-decoration: none;
+      transition: all 0.2s ease;
       cursor: pointer;
-      margin-top: 14px;
+    }
+
+    .btn-primary {
+      background: #38bdf8;
+      color: #0f172a;
+      box-shadow: 0 4px 14px rgba(56, 189, 248, 0.35);
+    }
+
+    .btn-primary:hover {
+      background: #7dd3fc;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #f8fafc;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.14);
+      transform: translateY(-2px);
+    }
+
+    .footer {
+      margin-top: 40px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .footer a {
+      color: #38bdf8;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>🚀 Welcome to IvanProject</h2>
-    <p>This is a live rendered preview of your HTML page.</p>
-    <button onclick="alert('Hello from the interactive Gist preview!')">Click me</button>
+
+  <div class="container">
+    <div class="badge">🚀 Live on GitHub Pages</div>
+    <h1>IvanProject</h1>
+    <p>Your HTML page is now rendering directly in the browser! You can edit this file to add any design, scripts, or components you need.</p>
+
+    <div class="button-group">
+      <a href="https://github.com/vanyadiamant18-debug/IvanProject" class="btn btn-primary" target="_blank">
+        <svg height="18" viewBox="0 0 16 16" width="18" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+        View on GitHub
+      </a>
+      <a href="https://gist.github.com/vanyadiamant18-debug/9514739796c2b36519401f457b52057d" class="btn btn-secondary" target="_blank">
+        View Gist
+      </a>
+    </div>
+
+    <div class="footer">
+      Hosted with ❤️ on <a href="https://pages.github.com/" target="_blank">GitHub Pages</a>
+    </div>
   </div>
-</body>
-</html>`;
 
-    // Elements
-    const codeText = document.getElementById('codeText');
-    const lineNums = document.getElementById('lineNums');
-    const previewFrame = document.getElementById('previewFrame');
-    const tabCode = document.getElementById('tabCode');
-    const tabPreview = document.getElementById('tabPreview');
-    const codeView = document.getElementById('codeView');
-    const copyBtn = document.getElementById('copyBtn');
-    const rawBtn = document.getElementById('rawBtn');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const themeToggle = document.getElementById('themeToggle');
-    const toast = document.getElementById('toast');
-
-    // Populate Code and Line Numbers
-    codeText.textContent = defaultHtmlSnippet;
-    const lines = defaultHtmlSnippet.split('\n');
-    lineNums.innerHTML = lines.map((_, i) => `<div>${i + 1}</div>`).join('');
-
-    // Load into preview iframe
-    previewFrame.srcdoc = defaultHtmlSnippet;
-
-    // Tabs toggle
-    tabCode.addEventListener('click', () => {
-      tabCode.classList.add('active');
-      tabPreview.classList.remove('active');
-      codeView.style.display = 'flex';
-      previewFrame.style.display = 'none';
-    });
-
-    tabPreview.addEventListener('click', () => {
-      tabPreview.classList.add('active');
-      tabCode.classList.remove('active');
-      codeView.style.display = 'none';
-      previewFrame.style.display = 'block';
-    });
-
-    // Toast notification
-    function showToast(msg) {
-      toast.textContent = msg;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2000);
-    }
-
-    // Copy to clipboard
-    copyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(defaultHtmlSnippet).then(() => {
-        showToast('✓ Copied to clipboard!');
-      });
-    });
-
-    // Raw button: open in new blank tab
-    rawBtn.addEventListener('click', () => {
-      const blob = new Blob([defaultHtmlSnippet], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
-    });
-
-    // Download button
-    downloadBtn.addEventListener('click', () => {
-      const blob = new Blob([defaultHtmlSnippet], { type: 'text/html' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'snippet.html';
-      a.click();
-    });
-
-    // Theme toggle
-    themeToggle.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('theme', next);
-    });
-
-    // Restore saved theme
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    }
-  </script>
 </body>
 </html>
